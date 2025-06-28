@@ -8,6 +8,10 @@ if not TOKEN:
 
 bot = telebot.TeleBot(TOKEN)
 
+# Port va webhook sozlamalari
+PORT = int(os.getenv("PORT", 5000))  # Render'da standart port 5000
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Webhook URL'si (keyinchalik sozlanadi)
+
 # Sizning Telegram ID'ingiz
 YOUR_TELEGRAM_ID = "1263747123"
 
@@ -17,7 +21,8 @@ user_states = {}
 # Foydalanuvchi savollari va javoblarni saqlash uchun global lug'at
 user_queries = {}
 
-# /start buyrug'i
+# Buyruqlar va handler'lar (oldingi kod bilan bir xil)
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     user_states[message.chat.id] = None
@@ -27,25 +32,21 @@ def send_welcome(message):
         "savollar uchun /question buyrug'ini sinab ko'ring!"
     ))
 
-# /code buyrug'i
 @bot.message_handler(commands=['code'])
 def send_code(message):
     user_states[message.chat.id] = "waiting_for_code"
     bot.reply_to(message, "Qanday kod namunasi kerak? Masalan, 'CSS flexbox' yoki 'JavaScript funksiyasi' ...")
 
-# /project buyrug'i
 @bot.message_handler(commands=['project'])
 def send_project(message):
     user_states[message.chat.id] = "waiting_for_project"
     bot.reply_to(message, "Loyiha boshqarish bo'yicha maslahat kerakmi? Masalan, 'Agile metodlari' yoki 'vaqtni boshqarish' ...")
 
-# /question buyrug'i
 @bot.message_handler(commands=['question'])
 def send_question(message):
     user_states[message.chat.id] = "waiting_for_question"
     bot.reply_to(message, "Savolingizni yozing ...")
 
-# /reply buyrug'i (admin uchun foydalanuvchiga javob yuborish)
 @bot.message_handler(commands=['reply'])
 def send_reply(message):
     if str(message.chat.id) == YOUR_TELEGRAM_ID:
@@ -63,7 +64,6 @@ def send_reply(message):
     else:
         bot.reply_to(message, "Sizda bu buyruqni ishlatish huquqi yo'q.")
 
-# Oddiy matnlarni qabul qilish
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     chat_id = message.chat.id
@@ -99,5 +99,14 @@ def handle_text(message):
     else:
         bot.reply_to(message, "Iltimos, buyruqlardan birini ishlating: /start, /code, /project, /question")
 
-# Botni ishga tushirish
-bot.polling()
+# Webhook bilan ishga tushirish
+def set_webhook():
+    if WEBHOOK_URL:
+        bot.set_webhook(url=WEBHOOK_URL)
+        print(f"Webhook o'rnatildi: {WEBHOOK_URL}")
+    else:
+        print("WEBHOOK_URL topilmadi, polling ishga tushadi.")
+
+if __name__ == "__main__":
+    set_webhook()
+    bot.polling()  # Agar webhook ishlamasa, polling ishga tushadi
