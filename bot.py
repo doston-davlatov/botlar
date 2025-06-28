@@ -10,7 +10,7 @@ bot = telebot.TeleBot(TOKEN)
 
 # Port va webhook sozlamalari
 PORT = int(os.getenv("PORT", 5000))  # Render'da standart port 5000
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Webhook URL'si (keyinchalik sozlanadi)
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Webhook URL'si (Render'dan olinadi)
 
 # Sizning Telegram ID'ingiz
 YOUR_TELEGRAM_ID = "1263747123"
@@ -102,11 +102,15 @@ def handle_text(message):
 # Webhook bilan ishga tushirish
 def set_webhook():
     if WEBHOOK_URL:
-        bot.set_webhook(url=WEBHOOK_URL)
+        bot.remove_webhook()  # Oldingi webhook'ni o'chirish
+        bot.set_webhook(url=WEBHOOK_URL, allowed_updates=['message'])
         print(f"Webhook o'rnatildi: {WEBHOOK_URL}")
     else:
         print("WEBHOOK_URL topilmadi, polling ishga tushadi.")
 
 if __name__ == "__main__":
-    set_webhook()
-    bot.polling()  # Agar webhook ishlamasa, polling ishga tushadi
+    try:
+        set_webhook()
+        bot.polling(non_stop=True)  # Polling'da to'xtamaslik uchun
+    except Exception as e:
+        print(f"Xato yuz berdi: {e}")
