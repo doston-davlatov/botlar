@@ -1,7 +1,7 @@
 import telebot
 
 # Telegram Bot tokenni shu yerga yozing
-TOKEN = "8010190605:AAFRCghjyy7frfHKwjUCGmKxfCRTn0YdhRI"
+TOKEN = "8029572892:AAHjpiaclLWSRqx7sl3oXC5ZtUBflb9iV-o"
 if not TOKEN:
     raise ValueError("❌ BOT_TOKEN topilmadi!")
 
